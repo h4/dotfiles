@@ -1,0 +1,66 @@
+#!/usr/bin/env python3
+# coding=utf-8
+import os
+import shutil
+import subprocess
+import sys
+
+ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+
+class Creator(object):
+    def __init__(self, name):
+        projects_home = os.getenv('PROJECT_HOME')
+        if projects_home is None:
+            sys.exit('ERROR: Environment variable PROJECT_HOME is not defined')
+        self.project_name = name
+        self.project_path = os.path.join(projects_home, project_name)
+        self.tpl_dir = os.path.join(ROOT_DIR, 'templates/project')
+        self.username = os.getenv('USER')
+        if not os.path.exists(self.tpl_dir):
+            sys.exit('ERROR: Projects template directory is not exists')
+
+    def create(self):
+        self.copy_template()
+        self.fill_readme()
+        self.init_repo()
+        self.publish_repo()
+
+    def copy_template(self):
+        try:
+            shutil.copytree(self.tpl_dir, self.project_path)
+        except OSError:
+            sys.exit('ERROR: Directory "{}" already exists'.format(self.project_name))
+
+    def fill_readme(self):
+        readme = os.path.join(self.project_path, 'README.md')
+        f = open(readme, 'r')
+        tpl = f.read()
+        f.close()
+        f = open(readme, 'w')
+        data = {
+            "project_name": self.project_name,
+            "user": self.username,
+        }
+        f.write(tpl.format(**data))
+
+    @staticmethod
+    def publish_repo():
+        allow = input("Publish on GitHub? [Y,n]: ")
+        if allow.upper() == 'Y':
+            subprocess.call(["hub", "create"])
+            subprocess.call(["hub", "push", "origin", "master"])
+
+    def init_repo(self):
+        os.chdir(self.project_path)
+        subprocess.call(["git", "init"])
+        subprocess.call(["git", "add", "."])
+        subprocess.call(["git", "commit", "-m", "Initial commit"])
+
+if __name__ == '__main__':
+    try:
+        project_name = sys.argv[1]
+    except IndexError:
+        project_name = input("Project name: ")
+    creator = Creator(project_name)
+    creator.create()
