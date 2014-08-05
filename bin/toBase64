@@ -1,0 +1,17 @@
+#!/usr/bin/env bash 
+# Contvert file to base64 and send to clipboard (OS X only)
+# Depends on imagemagick ($brew install imagemagick)
+
+if [ "$#" -eq 0 ]
+then
+	echo "Usage: toBase64 file"
+	exit 0
+fi
+
+type=`identify -format "%m" $1`
+ltype=$(echo $type | tr '[:upper:]' '[:lower:]')
+
+converted=`cat $1 | base64`
+
+echo -n "data:image/${ltype};base64,${converted}" | pbcopy
+
