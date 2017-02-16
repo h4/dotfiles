@@ -49,6 +49,7 @@ npm install -g yarn
 
 # Python
 brew install python
+pip install virtualenv
 
 # Remove outdated versions from the cellar
 brew cleanup

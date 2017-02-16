@@ -12,4 +12,6 @@ brew cask install tunnelblick
 brew cask install vlc
 brew cask install telegram
 brew cask install skype
+brew cask install adobe-photoshop-cc
+brew cask install adobe-photoshop-lightroom
 
